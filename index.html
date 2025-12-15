@@ -1,0 +1,759 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  CalendarCheck, 
+  Clock, 
+  Gem, 
+  LayoutDashboard, 
+  ChevronRight, 
+  X, 
+  Download, 
+  Users, 
+  CheckCircle2, 
+  AlertCircle,
+  Search,
+  Menu,
+  ArrowRight,
+  TrendingUp,
+  ShieldAlert
+} from 'lucide-react';
+
+// --- DATA SOURCE (Consolidated & Synthesized from both files) ---
+const DATA = {
+  stats: {
+    duration: "90 Ngày",
+    tasks: "13 Key Tasks",
+    phase: "Giai đoạn 1",
+    risk: "Trung bình"
+  },
+  masterplan: [
+    {
+      id: "phase1",
+      title: "PHASE 1: THIẾT KẾ & ĐỒNG BỘ (Tuần 1-4)",
+      focus: "Xây dựng nền tảng (Foundation)",
+      desc: "Thống nhất tiếng nói chung và chuẩn bị công cụ.",
+      tasks: [
+        { 
+          id: "t1.1", 
+          name: "Chốt bộ định nghĩa Values & Manifesto", 
+          start: "W1", end: "W1", 
+          raci: { r: "Rosie", a: "CEO", c: "PM", i: "All" },
+          details: {
+            what: "Thống nhất từng câu từng chữ trong định nghĩa 5 Giá trị cốt lõi và Tuyên ngôn (Manifesto). Đảm bảo ngôn ngữ sắc sảo, dễ nhớ, chạm cảm xúc.",
+            why: "Nếu định nghĩa mơ hồ, nhân viên sẽ hiểu sai. Sales hiểu 'Linh hoạt' là phá giá, Kế toán hiểu 'Linh hoạt' là làm ẩu. Sự đồng bộ ngay từ đầu giúp tránh 'tam sao thất bản'.",
+            how: [
+              "Rosie soạn thảo bản nháp v1 dựa trên phỏng vấn.",
+              "Họp kín với CEO để chốt tư tưởng (Buy-in).",
+              "Gửi cho các Key Manager (Sales, MKT) góp ý (để họ thấy mình được tôn trọng).",
+              "Ban hành văn bản chính thức có chữ ký CEO."
+            ],
+            example: "Thay vì định nghĩa 'Tận tâm là phục vụ tốt', hãy sửa thành: 'Tận tâm là giúp khách hàng bán được hàng (Sell-out), phản hồi trong 2h'."
+          }
+        },
+        { 
+          id: "t1.2", 
+          name: "Viết kịch bản 'Từ điển hành vi' (Sales vs Office)", 
+          start: "W1", end: "W2", 
+          raci: { r: "Rosie", a: "CEO", c: "KeyUser", i: "Tech" },
+          details: {
+            what: "Dịch chuyển các giá trị trừu tượng thành hành động cụ thể (DOs & DON'Ts) cho từng vị trí. Tách biệt rõ bộ hành vi cho Khối Kinh doanh và Khối Văn phòng.",
+            why: "Nhân viên không biết 'Chính trực' cụ thể là làm gì. Họ cần biết: 'Chính trực với Sales là không cắt máu, với Kế toán là không sửa số liệu'.",
+            how: [
+              "Phỏng vấn sâu Trưởng bộ phận về các lỗi sai thường gặp của nhân viên.",
+              "Liệt kê danh sách các hành vi tiêu cực (Toxic) cần loại bỏ -> Đưa vào mục DON'Ts.",
+              "Xác định hành vi chuẩn mực (Role model) -> Đưa vào mục DOs.",
+              "Nhóm lại theo từng Giá trị cốt lõi."
+            ],
+            example: "Với Sales: Hành vi DO là 'Báo cáo trung thực số tồn kho NPP', Hành vi DON'T là 'Ép hàng khi kho đại lý đã đầy'."
+          }
+        },
+        { 
+          id: "t1.3", 
+          name: "Thiết kế & Code App Culture OS", 
+          start: "W2", end: "W3", 
+          raci: { r: "Tech", a: "Rosie", c: "PM", i: "CEO" },
+          details: {
+            what: "Xây dựng ứng dụng nội bộ (Mobile App/Web) để số hóa việc ghi nhận văn hóa, khen thưởng và truyền thông.",
+            why: "Văn hóa cần công cụ để đo lường. Nếu chỉ nói miệng, văn hóa sẽ bay theo gió. App giúp biến hành vi vô hình thành dữ liệu hữu hình.",
+            how: [
+              "Thiết kế UX/UI các tính năng: Newsfeed, Reward, Quiz, Report.",
+              "Code Frontend & Backend.",
+              "Test nội bộ (UAT) với nhóm Key Users.",
+              "Deploy lên Store (Apple/Android) hoặc Web App."
+            ],
+            example: "Tính năng 'Gửi lời cảm ơn': Nhân viên A gửi coin cho Nhân viên B vì đã hỗ trợ nhiệt tình (Value: Hợp Lực)."
+          }
+        },
+        { 
+          id: "t1.4", 
+          name: "Ban hành Quy trình RACI phối hợp liên phòng ban", 
+          start: "W3", end: "W4", 
+          raci: { r: "PM", a: "CEO", c: "KeyUser", i: "All" },
+          details: {
+            what: "Vẽ lại bản đồ trách nhiệm (Ai làm, Ai duyệt, Ai phối hợp) cho các quy trình hay xảy ra xung đột.",
+            why: "Để chấm dứt văn hóa đổ lỗi. Khi có việc hỏng, nhìn vào RACI biết ngay lỗi ở khâu nào, ai chịu trách nhiệm, không cãi nhau.",
+            how: [
+              "Liệt kê 5 quy trình 'nóng' nhất thường xuyên gây cãi vã.",
+              "Tổ chức workshop với các trưởng bộ phận để điền bảng RACI.",
+              "Ký cam kết giữa các phòng ban.",
+              "Đưa lên App để tra cứu."
+            ],
+            example: "Quy trình Ra mắt SP mới: Marketing là (R) - chịu trách nhiệm nội dung, Sales là (C) - góp ý về giá/thị trường, CEO là (A) - duyệt ngân sách."
+          }
+        },
+        { 
+          id: "t1.5", 
+          name: "Đào tạo 'Train the Trainer' cho quản lý cấp trung", 
+          start: "W4", end: "W4", 
+          raci: { r: "Rosie", a: "CEO", c: "HR", i: "Managers" },
+          details: {
+            what: "Đào tạo kỹ năng quản trị văn hóa cho đội ngũ Quản lý cấp trung.",
+            why: "Quản lý cấp trung là người quyết định 70% văn hóa team. Nếu họ không hiểu hoặc không tin, văn hóa sẽ chết ngay tại cấp này.",
+            how: [
+              "Giải thích cơ chế đánh giá 5 Levels.",
+              "Role-play (Đóng vai) tình huống xử lý nhân viên vi phạm văn hóa.",
+              "Hướng dẫn cách dùng App để log hành vi nhân viên.",
+              "Giao KPI văn hóa cho quản lý."
+            ],
+            example: "Hướng dẫn Manager cách nói chuyện (Feedback) với một nhân viên Sales đang có doanh số tốt nhưng lại hay nói xấu đồng nghiệp."
+          }
+        }
+      ]
+    },
+    {
+      id: "phase2",
+      title: "PHASE 2: LAN TỎA & NHẬN THỨC (Tuần 5-8)",
+      focus: "Truyền thông & Đào tạo (Communication)",
+      desc: "Đưa văn hóa vào nhận thức của từng nhân viên.",
+      tasks: [
+        { 
+          id: "t2.1", 
+          name: "Townhall: Lễ ra quân & Ra mắt App", 
+          start: "W5", end: "W5", 
+          raci: { r: "CEO", a: "CEO", c: "Rosie", i: "All" },
+          details: {
+            what: "Sự kiện toàn công ty để CEO công bố Bộ Văn hóa mới và Chiến lược tương lai.",
+            why: "Tạo khí thế, sự trang trọng và cam kết từ cấp cao nhất.",
+            how: [
+              "Teasing (Hé lộ) trước sự kiện 1 tuần.",
+              "CEO bài phát biểu truyền cảm hứng (Storytelling).",
+              "Nghi thức cam kết (Ký tên).",
+              "Demo trực tiếp App trên sân khấu."
+            ],
+            example: "CEO chia sẻ câu chuyện khởi nghiệp gian khổ để minh họa cho giá trị 'Tận Tâm'."
+          }
+        },
+        { 
+          id: "t2.2", 
+          name: "Chiến dịch truyền thông: 'Mỗi tuần 1 Value'", 
+          start: "W5", end: "W9", 
+          raci: { r: "MKT Internal", a: "PM", c: "Rosie", i: "All" },
+          details: {
+            what: "Chuỗi truyền thông nội bộ kéo dài 5 tuần, mỗi tuần tập trung sâu vào 1 giá trị.",
+            why: "Mưa dầm thấm lâu. Không thể nhồi nhét tất cả cùng lúc.",
+            how: [
+              "Thứ 2: Email CEO về định nghĩa Value.",
+              "Thứ 3: Video phỏng vấn nhân viên tiêu biểu.",
+              "Thứ 5: Minigame/Quiz trên App.",
+              "Thứ 6: Tổng kết và vinh danh tuần."
+            ],
+            example: "Tuần lễ 'Chính Trực': Treo poster gương soi ở thang máy với dòng chữ 'Bạn có đang chính trực với chính mình?'"
+          }
+        },
+        { 
+          id: "t2.3", 
+          name: "Đào tạo 100% nhân viên về cách dùng App & Value", 
+          start: "W6", end: "W7", 
+          raci: { r: "PM/HR", a: "CEO", c: "KeyUser", i: "All" },
+          details: {
+            what: "Các buổi workshop nhỏ (theo team) để hướng dẫn chi tiết.",
+            why: "Đảm bảo không ai bị bỏ lại phía sau công nghệ và hiểu sai lệch về văn hóa.",
+            how: [
+              "Chia nhỏ các lớp theo phòng ban (Sales riêng, Back-office riêng).",
+              "Thực hành cài đặt App tại chỗ.",
+              "Giải đáp thắc mắc Q&A."
+            ],
+            example: "Đào tạo team Kho: Hướng dẫn họ dùng App để báo cáo sự cố hàng hóa (Value: Trách nhiệm)."
+          }
+        },
+        { 
+          id: "t2.4", 
+          name: "Minigame trên App: 'Săn tìm Văn hóa'", 
+          start: "W6", end: "W8", 
+          raci: { r: "HR", a: "PM", c: "Tech", i: "All" },
+          details: {
+            what: "Game hóa (Gamification) việc học văn hóa.",
+            why: "Học qua chơi (Play to Learn) hiệu quả hơn đọc tài liệu khô khan.",
+            how: [
+              "Nhân viên chụp ảnh đồng nghiệp đang thực hiện đúng hành vi văn hóa.",
+              "Upload lên App kèm hashtag.",
+              "Bình chọn nhận quà."
+            ],
+            example: "Chụp ảnh bạn Sales đang dọn rác sau sự kiện (Value: Đẳng Cấp)."
+          }
+        }
+      ]
+    },
+    {
+      id: "phase3",
+      title: "PHASE 3: ÁP DỤNG & SÀNG LỌC (Tuần 9-12)",
+      focus: "Vận hành & Đánh giá (Operation)",
+      desc: "Đưa vào đời sống thực tế và thanh lọc nhân sự.",
+      tasks: [
+        { 
+          id: "t3.1", 
+          name: "Áp dụng họp 'War Room' bắt buộc khi có sự cố", 
+          start: "W9", end: "Ongoing", 
+          raci: { r: "KeyUser", a: "CEO", c: "PM", i: "Rosie" },
+          details: {
+            what: "Cơ chế họp khẩn cấp liên phòng ban để giải quyết khủng hoảng ngay lập tức.",
+            why: "Xóa bỏ quy trình rườm rà khi có 'cháy'.",
+            how: [
+              "Quy định tiêu chí kích hoạt War Room (Ví dụ: Khách hàng khiếu nại gay gắt trên Mạng xã hội).",
+              "Triệu tập các trưởng bộ phận liên quan trong 15p.",
+              "Ra quyết định tại chỗ, không chờ văn bản."
+            ],
+            example: "Sự cố lỗi giá trên web -> War Room gồm IT, MKT, Sales họp online xử lý trong 30p."
+          }
+        },
+        { 
+          id: "t3.2", 
+          name: "Đánh giá thử nghiệm (Mock Review) trên App", 
+          start: "W10", end: "W10", 
+          raci: { r: "KeyUser", a: "PM", c: "Rosie", i: "HR" },
+          details: {
+            what: "Chạy nháp quy trình đánh giá nhân sự theo văn hóa.",
+            why: "Để nhân viên quen với việc bị đánh giá hành vi, tránh sốc khi vào kỳ review thật.",
+            how: [
+              "Mở cổng Review trên App.",
+              "Yêu cầu nhân viên tự chấm điểm.",
+              "Quản lý chấm thử và so sánh độ lệch."
+            ],
+            example: "Nhân viên tự nhận mình 5 sao 'Sáng Tạo', nhưng Quản lý chỉ chấm 3 sao vì chưa có ý tưởng mới."
+          }
+        },
+        { 
+          id: "t3.3", 
+          name: "Feedback 1:1 với nhân sự Level 1 & 2 (PIP)", 
+          start: "W11", end: "W11", 
+          raci: { r: "KeyUser", a: "HR", c: "CEO", i: "Rosie" },
+          details: {
+            what: "Lập biên bản PIP (Performance Improvement Plan) cho nhân sự yếu kém văn hóa.",
+            why: "Thanh lọc bộ máy, giữ lại người phù hợp.",
+            how: [
+              "Lập biên bản PIP, ghi rõ hành vi cần sửa.",
+              "Mentor kèm cặp sát sao.",
+              "Review sau 30 ngày. Đạt -> Giữ. Không đạt -> Off-boarding."
+            ],
+            example: "Nhân viên B hay đi trễ (Vi phạm 'Chuyên nghiệp'). PIP yêu cầu: Đi đúng giờ 100% trong 1 tháng."
+          }
+        },
+        { 
+          id: "t3.4", 
+          name: "Vinh danh 'Culture Star' quý đầu tiên", 
+          start: "W12", end: "W12", 
+          raci: { r: "CEO", a: "CEO", c: "HR", i: "All" },
+          details: {
+            what: "Lễ trao giải cho những cá nhân/tập thể sống đúng văn hóa nhất.",
+            why: "Tạo hình mẫu (Role Model) để người khác noi theo.",
+            how: [
+              "Dựa trên dữ liệu điểm từ App.",
+              "Hội đồng văn hóa bình chọn thêm.",
+              "Trao thưởng giá trị cao (tiền mặt/chuyến đi)."
+            ],
+            example: "Trao giải cho Team Kho vì đã có sáng kiến tiết kiệm vật tư đóng gói (Value: Hiệu Quả)."
+          }
+        }
+      ]
+    }
+  ],
+  dailylife: [
+    { time: "08:30", activity: "Stand-up Meeting (15p)", value: "Linh Hoạt", desc: "Toàn bộ team đứng họp nhanh. Trả lời 3 câu: Hôm qua làm gì? Hôm nay làm gì? Cần ai hỗ trợ? -> Không họp ngồi rề rà.", action: "Check-in App" },
+    { time: "10:00", activity: "Xử lý đơn hàng / Sự vụ", value: "Tận Tâm", desc: "Back-office xử lý yêu cầu Sales. Sales xử lý yêu cầu khách. Cam kết phản hồi trong 2h (SLA).", action: "Đo lường SLA" },
+    { time: "14:00", activity: "War Room (Nếu có sự cố)", value: "Hợp Lực", desc: "Nếu có khủng hoảng (loạn giá, hàng lỗi), Sales & MKT & Kho vào phòng họp ngay. Cấm đổ lỗi. Chỉ bàn giải pháp.", action: "Log sự cố" },
+    { time: "16:00", activity: "Deep Work / Audit", value: "Chính Trực", desc: "Kế toán kiểm tra số liệu. Sales cập nhật CRM trung thực. Không xào nấu báo cáo.", action: "Audit random" },
+    { time: "17:30", activity: "Clean-up & Plan", value: "Đẳng Cấp", desc: "Dọn dẹp bàn làm việc 5S trước khi về. Lên To-do list cho ngày mai.", action: "5S Check" }
+  ],
+  rituals: [
+    { 
+      id: 1, title: "Họp No-Surprise (Thứ 2)", value: "Chính Trực", 
+      desc: "Cuộc họp đầu tuần với CEO chỉ nói về TIN XẤU & RỦI RO. Tin tốt gửi email. Mục tiêu: Nhìn thẳng sự thật để xử lý sớm.",
+      who: "CEO + Managers"
+    },
+    { 
+      id: 2, title: "Chiếc Ghế Khách Hàng", value: "Tận Tâm", 
+      desc: "Trong mọi cuộc họp chiến lược, luôn để trống 1 chiếc ghế. Khi ra quyết định, hãy chỉ vào ghế đó và hỏi: 'Khách hàng có muốn điều này không?'.",
+      who: "All Meetings"
+    },
+    { 
+      id: 3, title: "Cà Phê Chéo (Random Coffee)", value: "Hợp Lực", 
+      desc: "Mỗi tuần, App random cặp đôi 2 người khác phòng ban đi uống cà phê (Công ty trả tiền). Mục tiêu: Xóa bỏ Silos, tăng kết nối.",
+      who: "Toàn bộ NV"
+    },
+    { 
+      id: 4, title: "Giải Thưởng 'Phá Vỡ'", value: "Linh Hoạt", 
+      desc: "Mỗi tháng trao 1 giải cho nhân sự đề xuất CẮT BỎ được 1 quy trình thừa hoặc giấy tờ rườm rà nhất.",
+      who: "CEO trao giải"
+    },
+    { 
+      id: 5, title: "Dress-code Day & 4 Eyes Check", value: "Đẳng Cấp", 
+      desc: "Thứ 2 & Thứ 6 mặc đồng phục chuẩn. Mọi văn bản gửi ra ngoài phải có người thứ 2 check lỗi (4 mắt).",
+      who: "Toàn bộ NV"
+    }
+  ]
+};
+
+// --- COMPONENTS ---
+
+// 1. Sidebar
+const Sidebar = ({ activeTab, setActiveTab }) => (
+  <aside className="w-20 md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-20 h-full overflow-y-auto transition-all duration-300">
+    <div className="p-4 space-y-2">
+      <p className="hidden md:block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 pl-2">
+        Menu Điều Hành
+      </p>
+      
+      <NavButton 
+        active={activeTab === 'overview'} 
+        onClick={() => setActiveTab('overview')} 
+        icon={<LayoutDashboard size={20} />} 
+        label="Tổng quan (Dashboard)" 
+      />
+      <NavButton 
+        active={activeTab === 'masterplan'} 
+        onClick={() => setActiveTab('masterplan')} 
+        icon={<CalendarCheck size={20} />} 
+        label="Master Plan & RACI" 
+      />
+      <NavButton 
+        active={activeTab === 'dailylife'} 
+        onClick={() => setActiveTab('dailylife')} 
+        icon={<Clock size={20} />} 
+        label="Một Ngày Tại HoanTT" 
+      />
+      <NavButton 
+        active={activeTab === 'rituals'} 
+        onClick={() => setActiveTab('rituals')} 
+        icon={<Gem size={20} />} 
+        label="Hệ Thống Nghi Thức" 
+      />
+    </div>
+
+    <div className="mt-auto p-4 border-t border-slate-800">
+      <div className="hidden md:block bg-slate-800/50 rounded p-3 text-xs text-slate-400 border border-slate-700/50">
+        <p className="font-bold text-[#C5A059] mb-1 flex items-center gap-2">
+          <Users size={12} /> Team Consultant
+        </p>
+        <p>Tập trung biến văn hóa thành thói quen (Habit Formation).</p>
+      </div>
+    </div>
+  </aside>
+);
+
+const NavButton = ({ active, onClick, icon, label }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full text-left px-3 py-3 rounded-lg flex items-center justify-center md:justify-start gap-3 transition-all duration-200 group ${
+      active 
+        ? 'bg-gradient-to-r from-[#C5A059]/20 to-transparent border-l-2 border-[#C5A059] text-[#C5A059]' 
+        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+    }`}
+  >
+    <span className={`${active ? 'text-[#C5A059]' : 'text-slate-500 group-hover:text-white'}`}>{icon}</span>
+    <span className="hidden md:block font-medium text-sm">{label}</span>
+  </button>
+);
+
+// 2. Dashboard Overview
+const OverviewView = ({ onNavigate }) => (
+  <div className="animate-fade-in space-y-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <StatCard label="Thời gian triển khai" value={DATA.stats.duration} color="border-l-[#C5A059]" icon={<Clock className="text-[#C5A059]" />} />
+      <StatCard label="Số lượng đầu việc" value={DATA.stats.tasks} color="border-l-blue-500" icon={<CheckCircle2 className="text-blue-500" />} />
+      <StatCard label="Trạng thái hiện tại" value={DATA.stats.phase} color="border-l-emerald-500" icon={<LayoutDashboard className="text-emerald-500" />} />
+      <StatCard label="Rủi ro dự báo" value={DATA.stats.risk} color="border-l-red-500" icon={<AlertCircle className="text-red-500" />} />
+    </div>
+
+    <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-8 text-center space-y-6">
+      <div className="w-16 h-16 rounded-full bg-[#C5A059]/20 flex items-center justify-center mx-auto mb-4">
+        <Gem size={32} className="text-[#C5A059]" />
+      </div>
+      <h2 className="text-3xl font-bold text-white uppercase tracking-wide">Sẵn sàng khởi chạy?</h2>
+      <p className="text-slate-400 max-w-2xl mx-auto">
+        Kế hoạch đã được chi tiết hóa đến từng tuần và từng cá nhân chịu trách nhiệm. 
+        Hãy bắt đầu bằng việc xem xét Master Plan hoặc khám phá các Nghi thức văn hóa.
+      </p>
+      <div className="flex justify-center gap-4">
+        <button onClick={() => onNavigate('masterplan')} className="bg-[#C5A059] hover:bg-yellow-600 text-slate-900 font-bold px-6 py-3 rounded-lg transition flex items-center gap-2">
+          Xem Master Plan <ArrowRight size={16} />
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+const StatCard = ({ label, value, color, icon }) => (
+  <div className={`bg-slate-800/40 backdrop-blur-md p-5 rounded-xl border border-slate-700/50 ${color} border-l-4 shadow-lg hover:translate-y-[-2px] transition-transform`}>
+    <div className="flex justify-between items-start">
+      <div>
+        <p className="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">{label}</p>
+        <p className="text-2xl font-bold text-white">{value}</p>
+      </div>
+      <div className="p-2 bg-slate-900/50 rounded-lg">{icon}</div>
+    </div>
+  </div>
+);
+
+// 3. Master Plan View with RACI & Detail Modal
+const MasterPlanView = ({ onOpenModal }) => {
+  return (
+    <div className="space-y-8 animate-fade-in pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-end border-b border-slate-800 pb-6">
+        <div>
+          <h2 className="text-3xl font-display font-bold text-white uppercase tracking-tight">Kế Hoạch & RACI Matrix</h2>
+          <p className="text-slate-400 mt-2">Lộ trình 90 ngày thiết lập hệ điều hành văn hóa</p>
+        </div>
+        
+        <div className="flex gap-4 mt-4 md:mt-0 text-xs text-slate-500 bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+          <span className="font-bold text-slate-300 uppercase mr-2">RACI:</span>
+          <span className="flex items-center gap-1"><span className="bg-red-500/20 text-red-400 border border-red-500/50 px-1.5 rounded text-[10px] font-bold">R</span> Responsible</span>
+          <span className="flex items-center gap-1"><span className="bg-amber-500/20 text-amber-400 border border-amber-500/50 px-1.5 rounded text-[10px] font-bold">A</span> Accountable</span>
+          <span className="flex items-center gap-1"><span className="bg-blue-500/20 text-blue-400 border border-blue-500/50 px-1.5 rounded text-[10px] font-bold">C</span> Consulted</span>
+          <span className="flex items-center gap-1"><span className="bg-slate-500/20 text-slate-400 border border-slate-500/50 px-1.5 rounded text-[10px] font-bold">I</span> Informed</span>
+        </div>
+      </div>
+
+      <div className="space-y-10">
+        {DATA.masterplan.map((phase) => (
+          <div key={phase.id} className="relative">
+            {/* Timeline Connector */}
+            <div className="absolute left-[27px] top-10 bottom-[-40px] w-0.5 bg-slate-800 -z-10 last:hidden"></div>
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-[#C5A059] text-[#C5A059] flex items-center justify-center font-bold text-xl shadow-[0_0_15px_rgba(197,160,89,0.3)] z-10">
+                {phase.id.replace('phase', '')}
+              </div>
+              <div>
+                <h3 className="text-[#C5A059] font-bold text-lg uppercase tracking-wide">{phase.title}</h3>
+                <p className="text-slate-400 text-sm italic">Focus: {phase.focus}</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800/40 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden ml-4 md:ml-7 shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-900/80 text-slate-400 uppercase text-xs font-bold tracking-wider">
+                    <tr>
+                      <th className="py-4 pl-6 w-[40%]">Hạng mục công việc (Task)</th>
+                      <th className="py-4 text-center w-[15%]">Timeline</th>
+                      <th className="py-4 text-center w-[25%] hidden md:table-cell">RACI (R-A-C-I)</th>
+                      <th className="py-4 text-center w-[20%]">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800">
+                    {phase.tasks.map((task) => (
+                      <tr key={task.id} className="hover:bg-white/5 transition duration-150 group">
+                        <td className="py-4 pl-6 pr-4">
+                          <p className="font-semibold text-slate-200 group-hover:text-[#C5A059] transition-colors">{task.name}</p>
+                          {/* Mobile RACI */}
+                          <div className="md:hidden flex gap-2 mt-2 text-[10px] opacity-70">
+                            <span className="bg-slate-900 px-1 rounded border border-slate-700">R: {task.raci.r}</span>
+                            <span className="bg-slate-900 px-1 rounded border border-slate-700">A: {task.raci.a}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 text-center">
+                          <span className="font-mono text-xs font-bold text-[#C5A059] bg-[#C5A059]/10 px-2 py-1 rounded border border-[#C5A059]/20">
+                            {task.start} - {task.end}
+                          </span>
+                        </td>
+                        <td className="py-4 text-center hidden md:table-cell">
+                          <div className="flex items-center justify-center gap-3 text-xs">
+                            <div className="flex flex-col items-center"><span className="text-red-400 font-bold mb-0.5">R</span><span className="text-slate-500">{task.raci.r}</span></div>
+                            <div className="w-px h-6 bg-slate-700"></div>
+                            <div className="flex flex-col items-center"><span className="text-amber-400 font-bold mb-0.5">A</span><span className="text-slate-500">{task.raci.a}</span></div>
+                            <div className="w-px h-6 bg-slate-700"></div>
+                            <div className="flex flex-col items-center"><span className="text-blue-400 font-bold mb-0.5">C</span><span className="text-slate-500">{task.raci.c}</span></div>
+                            <div className="w-px h-6 bg-slate-700"></div>
+                            <div className="flex flex-col items-center"><span className="text-slate-300 font-bold mb-0.5">I</span><span className="text-slate-500">{task.raci.i}</span></div>
+                          </div>
+                        </td>
+                        <td className="py-4 text-center px-4">
+                          <button 
+                            onClick={() => onOpenModal(task)}
+                            className="bg-blue-600/90 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 flex items-center justify-center gap-2 mx-auto w-full md:w-auto"
+                          >
+                            <Search size={14} /> Chi tiết
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// 4. Daily Life View
+const DailyLifeView = () => (
+  <div className="animate-fade-in pb-20">
+    <div className="border-b border-slate-800 pb-6 mb-10">
+      <h2 className="text-3xl font-display font-bold text-white uppercase">Một Ngày Tại HoanTT</h2>
+      <p className="text-slate-400 mt-2">Cách các giá trị cốt lõi được "sống" trong 8 tiếng làm việc.</p>
+    </div>
+
+    <div className="relative pl-4 md:pl-10 space-y-12">
+      <div className="absolute left-[23px] md:left-[47px] top-2 bottom-0 w-0.5 bg-slate-800"></div>
+      
+      {DATA.dailylife.map((item, idx) => (
+        <div key={idx} className="relative group">
+          {/* Time Marker */}
+          <div className="absolute -left-[30px] top-0 flex flex-col items-center z-10">
+            <div className="w-4 h-4 rounded-full bg-[#C5A059] border-4 border-slate-900 group-hover:scale-150 transition duration-300 shadow-[0_0_10px_#C5A059]"></div>
+          </div>
+
+          <div className="ml-6 bg-slate-800/40 backdrop-blur-md p-6 rounded-xl border border-slate-700 hover:border-[#C5A059]/50 transition-all duration-300 hover:translate-x-2 shadow-lg">
+            <div className="flex flex-col md:flex-row justify-between md:items-center mb-3 gap-2">
+              <div className="flex items-center gap-3">
+                <span className="text-[#C5A059] font-mono font-bold text-lg bg-[#C5A059]/10 px-2 py-0.5 rounded">{item.time}</span>
+                <h3 className="text-lg md:text-xl font-bold text-white">{item.activity}</h3>
+              </div>
+              <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-slate-700 text-[#C5A059] border border-[#C5A059]/30 w-fit">
+                Value: {item.value}
+              </span>
+            </div>
+            
+            <p className="text-slate-300 text-sm mb-5 leading-relaxed">{item.desc}</p>
+            
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-950/30 px-3 py-2 rounded-lg border border-emerald-500/20 w-fit">
+              <Users size={14} /> App Action: {item.action}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// 5. Rituals View
+const RitualsView = () => (
+  <div className="animate-fade-in pb-20">
+    <div className="border-b border-slate-800 pb-6 mb-10">
+      <h2 className="text-3xl font-display font-bold text-white uppercase">Hệ Thống Nghi Thức</h2>
+      <p className="text-slate-400 mt-2">Các hoạt động bắt buộc (Rituals) để neo giữ văn hóa vào tổ chức.</p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {DATA.rituals.map((r) => (
+        <div key={r.id} className="bg-slate-800/40 backdrop-blur-md p-6 rounded-xl border-t-4 border-[#C5A059] border-x border-b border-slate-700 hover:-translate-y-1 transition duration-300 shadow-xl">
+          <div className="flex justify-between items-start mb-4">
+            <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-[#C5A059] font-bold text-lg border border-slate-600 shadow-inner">
+              {r.id}
+            </div>
+            <div className="text-right">
+              <span className="block text-[10px] text-slate-500 uppercase font-bold tracking-wider">Core Value</span>
+              <span className="text-xs text-white font-bold bg-slate-700 px-2 py-0.5 rounded">{r.value}</span>
+            </div>
+          </div>
+          
+          <h3 className="text-xl font-display font-bold text-white mb-3 uppercase tracking-wide">{r.title}</h3>
+          <p className="text-slate-400 text-sm mb-6 min-h-[60px] leading-relaxed">{r.desc}</p>
+          
+          <div className="pt-4 border-t border-slate-700/50 flex items-center text-xs text-slate-500">
+            <Users size={14} className="mr-2" /> 
+            Đối tượng: <span className="text-slate-300 ml-1 font-bold">{r.who}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// 6. Detail Modal
+const DetailModal = ({ task, onClose }) => {
+  if (!task) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div 
+        className="w-full max-w-4xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col bg-[#0B1120] border border-slate-700 shadow-2xl animate-in zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="bg-slate-900 p-6 border-b border-slate-800 flex justify-between items-start shrink-0">
+          <div>
+            <span className="text-[#C5A059] text-xs font-bold uppercase tracking-widest mb-1 block">Chi tiết triển khai</span>
+            <h2 className="text-2xl font-display font-bold text-white uppercase leading-tight">{task.name}</h2>
+          </div>
+          <button 
+            onClick={onClose}
+            className="text-slate-400 hover:text-white transition bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        
+        {/* Modal Body */}
+        <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar flex-1 space-y-8 bg-gradient-to-br from-[#0B1120] to-[#151e32]">
+          
+          {/* WHAT */}
+          <div className="flex gap-5">
+            <div className="w-10 h-10 rounded-full bg-blue-900/20 border border-blue-500 text-blue-500 flex items-center justify-center shrink-0 font-bold text-lg shadow-[0_0_10px_rgba(59,130,246,0.2)]">W</div>
+            <div>
+              <h3 className="text-blue-400 font-bold text-lg uppercase mb-2 tracking-wide">What - Việc này là gì?</h3>
+              <p className="text-slate-300 leading-relaxed text-base">{task.details.what}</p>
+            </div>
+          </div>
+
+          {/* WHY */}
+          <div className="flex gap-5">
+            <div className="w-10 h-10 rounded-full bg-[#C5A059]/10 border border-[#C5A059] text-[#C5A059] flex items-center justify-center shrink-0 font-bold text-lg shadow-[0_0_10px_rgba(197,160,89,0.2)]">Y</div>
+            <div>
+              <h3 className="text-[#C5A059] font-bold text-lg uppercase mb-2 tracking-wide">Why - Tại sao quan trọng?</h3>
+              <div className="bg-[#C5A059]/5 p-4 rounded-lg border-l-2 border-[#C5A059] text-slate-200 italic">
+                "{task.details.why}"
+              </div>
+            </div>
+          </div>
+
+          {/* HOW */}
+          <div className="flex gap-5">
+            <div className="w-10 h-10 rounded-full bg-emerald-900/20 border border-emerald-500 text-emerald-500 flex items-center justify-center shrink-0 font-bold text-lg shadow-[0_0_10px_rgba(16,185,129,0.2)]">H</div>
+            <div className="w-full">
+              <h3 className="text-emerald-400 font-bold text-lg uppercase mb-3 tracking-wide">How - Các bước thực hiện</h3>
+              <div className="space-y-3">
+                {task.details.how.map((step, index) => (
+                  <div key={index} className="flex items-start gap-4 bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 hover:bg-slate-800 transition">
+                    <span className="text-emerald-500 font-bold text-lg leading-none mt-0.5">{index + 1}.</span>
+                    <p className="text-sm md:text-base text-slate-300">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* EXAMPLE */}
+          <div className="border-t border-slate-800 pt-6 mt-2">
+            <h3 className="text-slate-400 font-bold text-sm uppercase mb-3 flex items-center gap-2">
+              <Gem size={14} className="text-yellow-500" /> Ví dụ minh họa (Case Study)
+            </h3>
+            <div className="bg-slate-800 p-5 rounded-lg text-slate-300 border border-slate-700 shadow-inner">
+              {task.details.example}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Modal Footer */}
+        <div className="bg-slate-900 p-4 border-t border-slate-800 flex justify-end shrink-0">
+          <button onClick={onClose} className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold transition border border-slate-600">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- MAIN APP COMPONENT ---
+export default function App() {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Close sidebar on mobile when tab changes
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [activeTab]);
+
+  return (
+    <div className="h-screen flex flex-col bg-[#0f172a] text-slate-200 font-sans overflow-hidden selection:bg-[#C5A059] selection:text-black">
+      
+      {/* HEADER */}
+      <header className="h-16 bg-[#0B1120] border-b border-slate-800 flex items-center justify-between px-4 md:px-6 shrink-0 z-30 shadow-lg relative">
+        <div className="flex items-center gap-3">
+          <button 
+            className="md:hidden text-slate-400 hover:text-white"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            <Menu size={24} />
+          </button>
+          <div className="w-9 h-9 rounded bg-[#C5A059] flex items-center justify-center text-[#0B1120] font-display font-bold text-xl shadow-[0_0_15px_rgba(197,160,89,0.4)]">H</div>
+          <div className="flex flex-col">
+            <h1 className="font-display font-bold text-base md:text-lg uppercase tracking-wider text-white leading-none">HoanTT Group</h1>
+            <span className="text-[10px] text-[#C5A059] uppercase tracking-[0.2em] font-medium hidden md:block">Culture Implementation Plan</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-4 md:gap-6">
+           <div className="hidden md:block text-right">
+               <p className="text-[10px] text-slate-400 uppercase tracking-wider">Project Lead</p>
+               <p className="text-sm font-bold text-white">Rosie Đào Hạnh Giang</p>
+           </div>
+           <div className="h-8 w-px bg-slate-800 hidden md:block"></div>
+           <button className="bg-[#C5A059] hover:bg-yellow-600 text-slate-900 px-4 py-2 rounded font-bold text-xs uppercase tracking-wide transition shadow-lg shadow-yellow-600/20 flex items-center gap-2">
+               <Download size={14} /> <span className="hidden md:inline">Xuất Báo Cáo</span>
+           </button>
+        </div>
+      </header>
+
+      {/* BODY */}
+      <div className="flex flex-1 overflow-hidden relative">
+        
+        {/* Mobile Sidebar Backdrop */}
+        {isSidebarOpen && (
+          <div 
+            className="absolute inset-0 bg-black/50 z-10 md:hidden backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* SIDEBAR */}
+        <div className={`absolute inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-20 h-full`}>
+           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        </div>
+
+        {/* MAIN CONTENT AREA */}
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E1B4B] w-full">
+          <div className="max-w-7xl mx-auto p-4 md:p-10 min-h-full">
+            {activeTab === 'overview' && <OverviewView onNavigate={setActiveTab} />}
+            {activeTab === 'masterplan' && <MasterPlanView onOpenModal={setSelectedTask} />}
+            {activeTab === 'dailylife' && <DailyLifeView />}
+            {activeTab === 'rituals' && <RitualsView />}
+          </div>
+        </main>
+
+      </div>
+
+      {/* DETAIL MODAL */}
+      {selectedTask && (
+        <DetailModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+      )}
+
+      {/* GLOBAL STYLES FOR SCROLLBAR & ANIMATION */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@300;400;500;600;700&display=swap');
+        
+        .font-display { font-family: 'Oswald', sans-serif; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0B1120; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C5A059; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.4s ease-out forwards;
+        }
+      `}</style>
+    </div>
+  );
+}
